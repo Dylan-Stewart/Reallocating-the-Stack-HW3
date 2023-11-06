@@ -1,0 +1,786 @@
+Only in xv6-public-3: bio.d
+Only in xv6-public-3: bio.o
+Only in xv6-public-3: bootasm.d
+Only in xv6-public-3: bootasm.o
+Only in xv6-public-3: bootblock
+Only in xv6-public-3: bootblock.asm
+Only in xv6-public-3: bootblock.o
+Only in xv6-public-3: bootblockother.o
+Only in xv6-public-3: bootmain.d
+Only in xv6-public-3: bootmain.o
+Only in xv6-public-3: _cat
+Only in xv6-public-3: cat.asm
+Only in xv6-public-3: cat.d
+Only in xv6-public-3: cat.o
+Only in xv6-public-3: cat.sym
+Only in xv6-public-3: console.d
+Only in xv6-public-3: console.o
+diff -u xv6-public-master/defs.h xv6-public-3/defs.h
+--- xv6-public-master/defs.h	2020-08-10 14:28:02.000000000 -0400
++++ xv6-public-3/defs.h	2022-03-19 00:23:18.991457352 -0400
+@@ -9,6 +9,7 @@
+ struct sleeplock;
+ struct stat;
+ struct superblock;
++struct pstat; // 🔥
+ 
+ // bio.c
+ void            binit(void);
+@@ -120,6 +121,8 @@
+ int             wait(void);
+ void            wakeup(void*);
+ void            yield(void);
++int             getmypinfo(struct pstat*); // 🔥
++int 	        Total_tickets(void); // 🔥
+ 
+ // swtch.S
+ void            swtch(struct context**, struct context*);
+Only in xv6-public-3: _echo
+Only in xv6-public-3: echo.asm
+Only in xv6-public-3: echo.d
+Only in xv6-public-3: echo.o
+Only in xv6-public-3: echo.sym
+Only in xv6-public-3: entry.o
+Only in xv6-public-3: entryother
+Only in xv6-public-3: entryother.asm
+Only in xv6-public-3: entryother.d
+Only in xv6-public-3: entryother.o
+diff -u xv6-public-master/exec.c xv6-public-3/exec.c
+--- xv6-public-master/exec.c	2020-08-10 14:28:02.000000000 -0400
++++ xv6-public-3/exec.c	2022-05-01 22:59:59.204046954 -0400
+@@ -8,7 +8,7 @@
+ #include "elf.h"
+ 
+ int
+-exec(char *path, char **argv)
++exec(char *path, char **argv) // ☘️ Modified for HW 3
+ {
+   char *s, *last;
+   int i, off;
+@@ -17,7 +17,7 @@
+   struct inode *ip;
+   struct proghdr ph;
+   pde_t *pgdir, *oldpgdir;
+-  struct proc *curproc = myproc();
++  struct proc *curproc = myproc(); // ☘️
+ 
+   begin_op();
+ 
+@@ -63,10 +63,14 @@
+   // Allocate two pages at the next page boundary.
+   // Make the first inaccessible.  Use the second as the user stack.
+   sz = PGROUNDUP(sz);
+-  if((sz = allocuvm(pgdir, sz, sz + 2*PGSIZE)) == 0)
+-    goto bad;
+-  clearpteu(pgdir, (char*)(sz - 2*PGSIZE));
+-  sp = sz;
++  sp = KERNBASE-1; // ☘️ 
++  if((allocuvm(pgdir, sp - PGSIZE, sp)) == 0) // ☘️ 
++  				//originally if((sz = allocuvm(pgdir, sz, sz + 2*PGSIZE)) == 0)
++    panic("FAILED TO ALLOCATE THE PAGE!!!");
++  				// clearpteu(pgdir, (char*)(sz - 2*PGSIZE)); // ☘️ MAYBE NEEDED
++  					// sp = sz; // ☘️ MAYBE NEEDED
++  curproc->stackpages = 1; 	// ☘️ Added 
++  //cprintf("Initial number of pages by the process: %d\n", curproc->stackpages); // ☘️ Added
+ 
+   // Push argument strings, prepare rest of stack in ustack.
+   for(argc = 0; argv[argc]; argc++) {
+Only in xv6-public-3: exec.d
+Only in xv6-public-3: exec.o
+Only in xv6-public-3: file.d
+Only in xv6-public-3: file.o
+Only in xv6-public-3: _forktest
+Only in xv6-public-3: forktest.asm
+Only in xv6-public-3: forktest.d
+Only in xv6-public-3: forktest.o
+Only in xv6-public-3: fs.d
+Only in xv6-public-3: fs.img
+Only in xv6-public-3: fs.o
+Only in xv6-public-3: getmypinfo.c
+Only in xv6-public-3: _getreadcount
+Only in xv6-public-3: getreadcount.c
+Only in xv6-public-3: .git
+Only in xv6-public-3: _grep
+Only in xv6-public-3: grep.asm
+Only in xv6-public-3: grep.d
+Only in xv6-public-3: grep.o
+Only in xv6-public-3: grep.sym
+Only in xv6-public-3: ide.d
+Only in xv6-public-3: ide.o
+Only in xv6-public-3: _init
+Only in xv6-public-3: init.asm
+Only in xv6-public-3: initcode
+Only in xv6-public-3: initcode.asm
+Only in xv6-public-3: initcode.d
+Only in xv6-public-3: initcode.o
+Only in xv6-public-3: initcode.out
+Only in xv6-public-3: init.d
+Only in xv6-public-3: init.o
+Only in xv6-public-3: init.sym
+Only in xv6-public-3: ioapic.d
+Only in xv6-public-3: ioapic.o
+Only in xv6-public-3: kalloc.d
+Only in xv6-public-3: kalloc.o
+Only in xv6-public-3: kbd.d
+Only in xv6-public-3: kbd.o
+Only in xv6-public-3: kernel
+Only in xv6-public-3: kernel.asm
+Only in xv6-public-3: kernel.sym
+Only in xv6-public-3: _kill
+Only in xv6-public-3: kill.asm
+Only in xv6-public-3: kill.d
+Only in xv6-public-3: kill.o
+Only in xv6-public-3: kill.sym
+Only in xv6-public-3: lapic.d
+Only in xv6-public-3: lapic.o
+Only in xv6-public-3: _ln
+Only in xv6-public-3: ln.asm
+Only in xv6-public-3: ln.d
+Only in xv6-public-3: ln.o
+Only in xv6-public-3: ln.sym
+Only in xv6-public-3: log.d
+Only in xv6-public-3: log.o
+Only in xv6-public-3: _lotterytest
+Only in xv6-public-3: lotterytest.asm
+Only in xv6-public-3: lotterytest.c
+Only in xv6-public-3: lotterytest.d
+Only in xv6-public-3: lotterytest.o
+Only in xv6-public-3: lotterytest.sym
+Only in xv6-public-3: _ls
+Only in xv6-public-3: ls.asm
+Only in xv6-public-3: ls.d
+Only in xv6-public-3: ls.o
+Only in xv6-public-3: ls.sym
+Only in xv6-public-3: main.d
+Only in xv6-public-3: main.o
+diff -u xv6-public-master/Makefile xv6-public-3/Makefile
+--- xv6-public-master/Makefile	2020-08-10 14:28:02.000000000 -0400
++++ xv6-public-3/Makefile	2022-05-01 22:32:33.235402940 -0400
+@@ -27,6 +27,7 @@
+ 	uart.o\
+ 	vectors.o\
+ 	vm.o\
++	rand.o\
+ 
+ # Cross-compiling (e.g., on Mac OS X)
+ # TOOLPREFIX = i386-jos-elf
+@@ -181,6 +182,10 @@
+ 	_usertests\
+ 	_wc\
+ 	_zombie\
++	_readcount\
++	_lotterytest\
++	_stacktester\
++	_stacktoheap\
+ 
+ fs.img: mkfs README $(UPROGS)
+ 	./mkfs fs.img README $(UPROGS)
+@@ -217,7 +222,7 @@
+ 	then echo "-gdb tcp::$(GDBPORT)"; \
+ 	else echo "-s -p $(GDBPORT)"; fi)
+ ifndef CPUS
+-CPUS := 2
++CPUS := 1
+ endif
+ QEMUOPTS = -drive file=fs.img,index=1,media=disk,format=raw -drive file=xv6.img,index=0,media=disk,format=raw -smp $(CPUS) -m 512 $(QEMUEXTRA)
+ 
+@@ -249,8 +254,7 @@
+ 
+ EXTRA=\
+ 	mkfs.c ulib.c user.h cat.c echo.c forktest.c grep.c kill.c\
+-	ln.c ls.c mkdir.c rm.c stressfs.c usertests.c wc.c zombie.c\
+-	printf.c umalloc.c\
++	ln.c ls.c mkdir.c rm.c stressfs.c usertests.c wc.c zombie.c\ readcount.c\ stacktester.c\ stacktoheap.c\ lotterytest.c\ printf.c umalloc.c\
+ 	README dot-bochsrc *.pl toc.* runoff runoff1 runoff.list\
+ 	.gdbinit.tmpl gdbutil\
+ 
+Only in xv6-public-3: _mkdir
+Only in xv6-public-3: mkdir.asm
+Only in xv6-public-3: mkdir.d
+Only in xv6-public-3: mkdir.o
+Only in xv6-public-3: mkdir.sym
+Only in xv6-public-3: mkfs
+Only in xv6-public-3: mp.d
+Only in xv6-public-3: mp.o
+Only in xv6-public-3: picirq.d
+Only in xv6-public-3: picirq.o
+Only in xv6-public-3: pipe.d
+Only in xv6-public-3: pipe.o
+Only in xv6-public-3: printf.d
+Only in xv6-public-3: printf.o
+diff -u xv6-public-master/proc.c xv6-public-3/proc.c
+--- xv6-public-master/proc.c	2020-08-10 14:28:02.000000000 -0400
++++ xv6-public-3/proc.c	2022-04-24 19:20:37.421547787 -0400
+@@ -6,11 +6,14 @@
+ #include "x86.h"
+ #include "proc.h"
+ #include "spinlock.h"
++#include "rand.h" // 🔥
++#include "pstat.h" // 🔥
+ 
+ struct {
+   struct spinlock lock;
+   struct proc proc[NPROC];
+ } ptable;
++ // originally moved definition from here but Shan told to move it back... 🔥
+ 
+ static struct proc *initproc;
+ 
+@@ -65,6 +68,27 @@
+   return p;
+ }
+ 
++int getmypinfo(struct pstat *ps){ // 🔥
++      acquire(&ptable.lock);
++      struct proc *p;
++    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
++    int i = p-ptable.proc; // calculate index of process
++    if (p->state != UNUSED) {
++        ps->inuse[i] = 1;
++        }
++        
++    else{
++    	ps->inuse[i] = 0;
++    }
++    	 ps->tickets[i] = p->tickets;
++        ps->pid[i] = p->pid;
++        ps->ticks[i] = p->ticks;
++}
++    release(&ptable.lock);
++    return 0;
++}
++
++
+ //PAGEBREAK: 32
+ // Look in the process table for an UNUSED proc.
+ // If found, change state to EMBRYO and initialize
+@@ -75,7 +99,6 @@
+ {
+   struct proc *p;
+   char *sp;
+-
+   acquire(&ptable.lock);
+ 
+   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+@@ -88,7 +111,10 @@
+ found:
+   p->state = EMBRYO;
+   p->pid = nextpid++;
+-
++  p->readcalls = 0; //⭐
++  p->tickets = 10; // 🔥
++  p->ticks = 0; // 🔥
++  
+   release(&ptable.lock);
+ 
+   // Allocate kernel stack.
+@@ -199,6 +225,11 @@
+   np->sz = curproc->sz;
+   np->parent = curproc;
+   *np->tf = *curproc->tf;
++  np->stackpages = curproc->stackpages; // ☘️
++  
++  //* ADDED TO MAKE CHILDREN PROCCESSES INHERIT THEIR PARENTS TICKET COUNT 🔥
++	np->tickets = curproc->tickets; // 🔥
++	np->ticks = 0; // 🔥
+ 
+   // Clear %eax so that fork returns 0 in the child.
+   np->tf->eax = 0;
+@@ -311,6 +342,18 @@
+   }
+ }
+ 
++int Total_tickets(void) // 🔥
++{
++  int total = 0;
++  struct proc *p;
++
++  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){ // loops through ptable to sum all tickets of the processes so that you can RNG choose the winner
++    if(p->state == RUNNABLE || p->state == RUNNING) total += p->tickets;
++  }
++
++  return total;
++}
++
+ //PAGEBREAK: 42
+ // Per-CPU process scheduler.
+ // Each CPU calls scheduler() after setting itself up.
+@@ -326,29 +369,50 @@
+   struct cpu *c = mycpu();
+   c->proc = 0;
+   
++  
++  int count; // 🔥
++  int winner; // 🔥
++  count = 0; // 🔥
++  winner = 0; // 🔥
++  
+   for(;;){
+     // Enable interrupts on this processor.
+     sti();
+ 
+-    // Loop over process table looking for process to run.
++    
+     acquire(&ptable.lock);
++    
++    count = 0; // 🔥
++    winner = random_at_most(Total_tickets()); // 🔥
++    
++    // Loop over process table looking for process to run.
+     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+-      if(p->state != RUNNABLE)
++      if(p->state != RUNNABLE){
+         continue;
+-
++}
++	
++      if ((count + p->tickets) < winner){ // comparing each process to the winner 🔥
++      
++      count += p->tickets; // incrementing tickets 🔥
++        continue; // 🔥
++        } // 🔥
++        
+       // Switch to chosen process.  It is the process's job
+       // to release ptable.lock and then reacquire it
+       // before jumping back to us.
+       c->proc = p;
+       switchuvm(p);
+       p->state = RUNNING;
+-
++	// goal to add current ticks with one tick ex. 1000 | 1 | (10ticks)🔥
++	p->ticks++; // case interrupts happen 🔥
+       swtch(&(c->scheduler), p->context);
++      // 🔥 removed inuse from here and added to getmypinfo
+       switchkvm();
+ 
+       // Process is done running for now.
+       // It should have changed its p->state before coming back.
+       c->proc = 0;
++      break; // leave for loop after we found our winner 🔥
+     }
+     release(&ptable.lock);
+ 
+@@ -523,7 +587,8 @@
+       state = states[p->state];
+     else
+       state = "???";
+-    cprintf("%d %s %s", p->pid, state, p->name);
++    cprintf("%d %s %s", p->pid, state, p->name); 
++    // cprintf("%d %s %s Tickets: %d", p->pid, state, p->name, p->tickets); // 🔥
+     if(p->state == SLEEPING){
+       getcallerpcs((uint*)p->context->ebp+2, pc);
+       for(i=0; i<10 && pc[i] != 0; i++)
+@@ -532,3 +597,4 @@
+     cprintf("\n");
+   }
+ }
++
+Only in xv6-public-3: .proc.c.swp
+Only in xv6-public-3: proc.d
+diff -u xv6-public-master/proc.h xv6-public-3/proc.h
+--- xv6-public-master/proc.h	2020-08-10 14:28:02.000000000 -0400
++++ xv6-public-3/proc.h	2022-04-24 17:45:57.630773997 -0400
+@@ -1,3 +1,8 @@
++#ifndef _PROC_H_
++#define _PROC_H_
++
++#include "spinlock.h"
++
+ // Per-CPU state
+ struct cpu {
+   uchar apicid;                // Local APIC ID
+@@ -49,6 +54,13 @@
+   struct file *ofile[NOFILE];  // Open files
+   struct inode *cwd;           // Current directory
+   char name[16];               // Process name (debugging)
++  
++  int readcalls; // # of times read is called by kernel at boot ⭐
++  int ticks; // # of ticks each process gains 🔥
++  int tickets; // # of tickets each process receives 🔥
++  int inuse; // Whether its being run on the CPU currently 🔥
++  int stackpages; // number of stack pages ☘️
++  
+ };
+ 
+ // Process memory is laid out contiguously, low addresses first:
+@@ -56,3 +68,11 @@
+ //   original data and bss
+ //   fixed-size stack
+ //   expandable heap
++
++//struct ptable_type { // 🔥 moved definition here from proc.c
++//	struct spinlock lock;
++//	struct proc proc[NPROC];
++//} ptable;
++//extern struct ptable_type ptable;
++
++#endif // _PROC_H_
+Only in xv6-public-3: proc.o
+Only in xv6-public-3: Programs
+Only in xv6-public-3: pstat.h
+Only in xv6-public-3: rand.c
+Only in xv6-public-3: rand.d
+Only in xv6-public-3: rand.h
+Only in xv6-public-3: rand.o
+Only in xv6-public-3: _readcount
+Only in xv6-public-3: readcount.asm
+Only in xv6-public-3: readcount.c
+Only in xv6-public-3: readcount.d
+Only in xv6-public-3: readcount.o
+Only in xv6-public-3: readcount.sym
+Only in xv6-public-3: _rm
+Only in xv6-public-3: rm.asm
+Only in xv6-public-3: rm.d
+Only in xv6-public-3: rm.o
+Only in xv6-public-3: rm.sym
+Only in xv6-public-3: s
+Only in xv6-public-3: _sh
+Only in xv6-public-3: sh.asm
+Only in xv6-public-3: sh.d
+Only in xv6-public-3: sh.o
+Only in xv6-public-3: sh.sym
+Only in xv6-public-3: sleeplock.d
+Only in xv6-public-3: sleeplock.o
+Only in xv6-public-3: spinlock.d
+diff -u xv6-public-master/spinlock.h xv6-public-3/spinlock.h
+--- xv6-public-master/spinlock.h	2020-08-10 14:28:02.000000000 -0400
++++ xv6-public-3/spinlock.h	2022-03-13 16:28:26.359038014 -0400
+@@ -1,3 +1,6 @@
++#ifndef _SPINLOCK_H_
++#define _SPINLOCK_H_
++
+ // Mutual exclusion lock.
+ struct spinlock {
+   uint locked;       // Is the lock held?
+@@ -9,3 +12,4 @@
+                      // that locked the lock.
+ };
+ 
++#endif
+Only in xv6-public-3: spinlock.o
+Only in xv6-public-3: _stacktester
+Only in xv6-public-3: stacktester.asm
+Only in xv6-public-3: stacktester.c
+Only in xv6-public-3: stacktester.d
+Only in xv6-public-3: stacktester.o
+Only in xv6-public-3: stacktester.sym
+Only in xv6-public-3: _stacktoheap
+Only in xv6-public-3: stacktoheap.asm
+Only in xv6-public-3: stacktoheap.c
+Only in xv6-public-3: stacktoheap.d
+Only in xv6-public-3: stacktoheap.o
+Only in xv6-public-3: stacktoheap.sym
+Only in xv6-public-3: _stressfs
+Only in xv6-public-3: stressfs.asm
+Only in xv6-public-3: stressfs.d
+Only in xv6-public-3: stressfs.o
+Only in xv6-public-3: stressfs.sym
+Only in xv6-public-3: string.d
+Only in xv6-public-3: string.o
+Only in xv6-public-3: swtch.o
+diff -u xv6-public-master/syscall.c xv6-public-3/syscall.c
+--- xv6-public-master/syscall.c	2020-08-10 14:28:02.000000000 -0400
++++ xv6-public-3/syscall.c	2022-04-29 19:07:07.300269156 -0400
+@@ -17,10 +17,12 @@
+ int
+ fetchint(uint addr, int *ip)
+ {
+-  struct proc *curproc = myproc();
++  //struct proc *curproc = myproc();
+ 
+-  if(addr >= curproc->sz || addr+4 > curproc->sz)
+-    return -1;
++  
++  //if(addr >= curproc->sz || addr+4 > curproc->sz)
++    //return -1;
++ 
+   *ip = *(int*)(addr);
+   return 0;
+ }
+@@ -34,11 +36,12 @@
+   char *s, *ep;
+   struct proc *curproc = myproc();
+ 
+-  if(addr >= curproc->sz)
+-    return -1;
++ //if(addr >= curproc->sz)
++  //return -1;
++
+   *pp = (char*)addr;
+-  ep = (char*)curproc->sz;
+-  for(s = *pp; s < ep; s++){
++  ep = (char*)curproc->sz; // used to store the size
++  for(s = *pp; s < ep; s++){ // pp -> kernbase-1 "changed"
+     if(*s == 0)
+       return s - *pp;
+   }
+@@ -59,12 +62,12 @@
+ argptr(int n, char **pp, int size)
+ {
+   int i;
+-  struct proc *curproc = myproc();
++  //struct proc *curproc = myproc();
+  
+   if(argint(n, &i) < 0)
+     return -1;
+-  if(size < 0 || (uint)i >= curproc->sz || (uint)i+size > curproc->sz)
+-    return -1;
++  //if(size < 0 || (uint)i >= curproc->sz || (uint)i+size > curproc->sz)
++    //return -1;
+   *pp = (char*)i;
+   return 0;
+ }
+Only in xv6-public-3: syscall.c.backup
+Only in xv6-public-3: syscall.d
+diff -u xv6-public-master/syscall.h xv6-public-3/syscall.h
+--- xv6-public-master/syscall.h	2020-08-10 14:28:02.000000000 -0400
++++ xv6-public-3/syscall.h	2022-03-13 17:34:04.536776237 -0400
+@@ -20,3 +20,6 @@
+ #define SYS_link   19
+ #define SYS_mkdir  20
+ #define SYS_close  21
++#define SYS_getreadcount 22 // ⭐
++#define SYS_settickets 23 // 🔥
++#define SYS_getpinfo 24 // 🔥
+Only in xv6-public-3: syscall.o
+diff -u xv6-public-master/sysfile.c xv6-public-3/sysfile.c
+--- xv6-public-master/sysfile.c	2020-08-10 14:28:02.000000000 -0400
++++ xv6-public-3/sysfile.c	2022-03-16 17:52:28.609640173 -0400
+@@ -85,7 +85,7 @@
+   int n;
+   char *p;
+ 
+-  if(argfd(0, 0, &f) < 0 || argint(2, &n) < 0 || argptr(1, &p, n) < 0)
++  if(argfd(0, 0, &f) < 0 || argint(2, &n) < 0 || argptr(1, &p, n) < 0) /// position data size
+     return -1;
+   return filewrite(f, p, n);
+ }
+Only in xv6-public-3: sysfile.d
+Only in xv6-public-3: sysfile.o
+diff -u xv6-public-master/sysproc.c xv6-public-3/sysproc.c
+--- xv6-public-master/sysproc.c	2020-08-10 14:28:02.000000000 -0400
++++ xv6-public-3/sysproc.c	2022-03-18 19:40:07.217158632 -0400
+@@ -5,7 +5,7 @@
+ #include "param.h"
+ #include "memlayout.h"
+ #include "mmu.h"
+-#include "proc.h"
++#include "proc.h" // 🔥
+ 
+ int
+ sys_fork(void)
+@@ -79,8 +79,7 @@
+ 
+ // return how many clock tick interrupts have occurred
+ // since start.
+-int
+-sys_uptime(void)
++int sys_uptime(void)
+ {
+   uint xticks;
+ 
+@@ -89,3 +88,40 @@
+   release(&tickslock);
+   return xticks;
+ }
++
++// ⭐ first hw assignment ⭐
++// returns how many times that the read() system call has been called by user processes since the time that the kernel was booted.
++
++int sys_getreadcount(void) // ⭐ 
++{
++
++return myproc()->readcalls;
++}
++
++// 🔥 second hw assignment 🔥
++
++//function to set the tickets for the lottery test
++//calling this routine makes it such that a process can raise the number of tickets it receives, and thus receive a higher proportion of CPU cycles. This routine should return 0 if successful, and -1 otherwise
++
++int sys_settickets(void) { // 🔥
++    int x;
++    //struct pstat* ps;
++
++    if(argint(0, &x) < 0)
++        return -1;
++
++    //acquire(&ptable.lock); 🔥 removed because you can't access table in here without .h that causes errors
++    myproc()->tickets = x;
++    //release(&ptable.lock); 🔥 removed because you can't access table in here .h that causes errors
++    return 0;
++}
++
++ // This routine returns some information about all running processes, including how many times each has been chosen to run and the process ID of each, and save them in the pstat structure in the parameters list. You can use this system call to build a variant of the command line program ps, which can then be called to see what is going on
++int sys_getpinfo(void) { // 🔥
++    struct pstat* procstaterino;
++	if(argptr(0, (char**)&procstaterino, sizeof(procstaterino) < 0)){ // fail check
++	return -1;
++	}
++	getmypinfo(procstaterino);
++return 0;
++}
+Only in xv6-public-3: .sysproc.c.swn
+Only in xv6-public-3: .sysproc.c.swo
+Only in xv6-public-3: sysproc.d
+Only in xv6-public-3: sysproc.o
+Only in xv6-public-3: test.c
+Only in xv6-public-3: Thegoldenpatch3.patch
+Only in xv6-public-3: trapasm.o
+diff -u xv6-public-master/trap.c xv6-public-3/trap.c
+--- xv6-public-master/trap.c	2020-08-10 14:28:02.000000000 -0400
++++ xv6-public-3/trap.c	2022-05-06 20:04:28.009827080 -0400
+@@ -34,7 +34,7 @@
+ 
+ //PAGEBREAK: 41
+ void
+-trap(struct trapframe *tf)
++trap(struct trapframe *tf) // ☘️ Modified for HW 3
+ {
+   if(tf->trapno == T_SYSCALL){
+     if(myproc()->killed)
+@@ -77,6 +77,24 @@
+             cpuid(), tf->cs, tf->eip);
+     lapiceoi();
+     break;
++  case T_PGFLT: ; // ☘️
++    uint f = rcr2(); // ☘️
++    uint g = KERNBASE - ((myproc()->stackpages +1) * PGSIZE);
++    //f = PGROUNDDOWN(f); // ☘️
++  if (f > g && (f < KERNBASE-myproc()->stackpages*PGSIZE)){ 
++  // ☘️ in next page below our pages 
++  	//f = PGROUNDDOWN(f);
++	cprintf("%x\n", f);
++    	if (allocuvm(myproc()->pgdir, g, g + PGSIZE) == 0) { // ☘️
++      cprintf("allocuvm failed... Number of current pages: %d\n", myproc()->stackpages); // ☘️
++      exit();
++      } else {
++      myproc()->stackpages++;
++      cprintf("allocuvm succeeded... Number of pages allocated: %d\n", myproc()->stackpages); // ☘️
++      }
++    }
++    break; // ☘️
++    
+ 
+   //PAGEBREAK: 13
+   default:
+Only in xv6-public-3: trap.d
+Only in xv6-public-3: trap.o
+Only in xv6-public-3: uart.d
+Only in xv6-public-3: uart.o
+Only in xv6-public-3: ulib.d
+Only in xv6-public-3: ulib.o
+Only in xv6-public-3: umalloc.d
+Only in xv6-public-3: umalloc.o
+diff -u xv6-public-master/user.h xv6-public-3/user.h
+--- xv6-public-master/user.h	2020-08-10 14:28:02.000000000 -0400
++++ xv6-public-3/user.h	2022-03-18 19:35:38.939543708 -0400
+@@ -1,6 +1,10 @@
++
++#include "pstat.h" // 🔥
++
+ struct stat;
+ struct rtcdate;
+ 
++
+ // system calls
+ int fork(void);
+ int exit(void) __attribute__((noreturn));
+@@ -23,6 +27,9 @@
+ char* sbrk(int);
+ int sleep(int);
+ int uptime(void);
++int getreadcount(void); // ⭐
++int settickets(int); // 🔥
++int getpinfo(struct pstat *); // 🔥
+ 
+ // ulib.c
+ int stat(const char*, struct stat*);
+Only in xv6-public-3: _usertests
+Only in xv6-public-3: usertests.asm
+Only in xv6-public-3: usertests.d
+Only in xv6-public-3: usertests.o
+Only in xv6-public-3: usertests.sym
+Only in xv6-public-3: usys.o
+diff -u xv6-public-master/usys.S xv6-public-3/usys.S
+--- xv6-public-master/usys.S	2020-08-10 14:28:02.000000000 -0400
++++ xv6-public-3/usys.S	2022-03-13 17:36:46.195938020 -0400
+@@ -29,3 +29,6 @@
+ SYSCALL(sbrk)
+ SYSCALL(sleep)
+ SYSCALL(uptime)
++SYSCALL(getreadcount) // ⭐
++SYSCALL(settickets) // 🔥
++SYSCALL(getpinfo) // 🔥
+Only in xv6-public-3: .usys.swp
+Only in xv6-public-3: vectors.o
+Only in xv6-public-3: vectors.S
+diff -u xv6-public-master/vm.c xv6-public-3/vm.c
+--- xv6-public-master/vm.c	2020-08-10 14:28:02.000000000 -0400
++++ xv6-public-3/vm.c	2022-05-06 16:09:39.556315993 -0400
+@@ -239,11 +239,11 @@
+     }
+     memset(mem, 0, PGSIZE);
+     if(mappages(pgdir, (char*)a, PGSIZE, V2P(mem), PTE_W|PTE_U) < 0){
+-      cprintf("allocuvm out of memory (2)\n");
+-      deallocuvm(pgdir, newsz, oldsz);
++     cprintf("allocuvm out of memory (2)\n");
++     deallocuvm(pgdir, newsz, oldsz);
+       kfree(mem);
+-      return 0;
+-    }
++     return 0;
++   }
+   }
+   return newsz;
+ }
+@@ -319,6 +319,7 @@
+   pte_t *pte;
+   uint pa, i, flags;
+   char *mem;
++  struct proc *curproc = myproc(); // ☘️
+ 
+   if((d = setupkvm()) == 0)
+     return 0;
+@@ -337,7 +338,27 @@
+       goto bad;
+     }
+   }
+-  return d;
++
++  
++  uint t = KERNBASE; // ☘️
++  //t = PGROUNDDOWN(t); // ☘️
++  
++  for(i = t - (curproc->stackpages) * PGSIZE; i < t; i += PGSIZE){ // ☘️
++    
++    if((pte = walkpgdir(pgdir, (void *) i, 0)) == 0) // ☘️
++      panic("copyuvm: pte should exist"); // ☘️
++    if(!(*pte & PTE_P)) // ☘️
++      panic("copyuvm: page not present"); // ☘️
++    pa = PTE_ADDR(*pte); // ☘️
++    flags = PTE_FLAGS(*pte); // ☘️
++    if((mem = kalloc()) == 0) // ☘️
++      goto bad; // ☘️
++    memmove(mem, (char*)P2V(pa), PGSIZE); // ☘️
++    if(mappages(d, (void*)i, PGSIZE, V2P(mem), flags) < 0) // ☘️
++      goto bad; // ☘️
++  } // ☘️
++  
++  return d; // ☘️
+ 
+ bad:
+   freevm(d);
+Only in xv6-public-3: vm.d
+Only in xv6-public-3: vm.o
+Only in xv6-public-3: _wc
+Only in xv6-public-3: wc.asm
+Only in xv6-public-3: wc.d
+Only in xv6-public-3: wc.o
+Only in xv6-public-3: wc.sym
+Only in xv6-public-3: xv6.img
+Only in xv6-public-3: _zombie
+Only in xv6-public-3: zombie.asm
+Only in xv6-public-3: zombie.d
+Only in xv6-public-3: zombie.o
+Only in xv6-public-3: zombie.sym
